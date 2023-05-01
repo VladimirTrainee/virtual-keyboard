@@ -20,45 +20,77 @@ export class KeyBoard {
       this.languages = ['En', 'Ru'];
       this.languageIndex = 0;
       this.events = {};
+      this.functions = {};
+
+      this.functions.updateButtonClass = (keyCode, pressed = false) => {
+        const keyName = (this.keys[keyCode].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
+        const keyId = `${keyCode}${this.idMasks.nodeLabel.key}`;
+        const element = (keyId) ? document.getElementById(keyId) : undefined;
+        const pressedMask = (pressed) ? this.idMasks.nodeLabel.pressed : '';
+        if (element) element.classList.value = `${keyName}${pressedMask}`;
+      }
       
       this.events.keydown = (event) => {
-        const key = (this.keys[event.code].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
-        const keyId = `${event.code}${this.idMasks.nodeLabel.key}`;
-        document.getElementById(keyId).classList.value = `${key}${this.idMasks.nodeLabel.pressed}`;
-        return ;
+        const key = event.code;
+        switch(key) {
+          case this.keys.Tab.code:
+            event.preventDefault();
+            this.functions.updateButtonClass(event.code, true);
+            break;
+          case this.keys.CapsLock.code:
+            this[key] = !this[key];
+            this.functions.updateButtonClass(event.code, this[key]);
+            break;
+          default:
+            this.functions.updateButtonClass(event.code, true);
+            break;
+
+        }
       }
 
       this.events.keyup = (event) => {
-        const key = (this.keys[event.code].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
-        const keyId = `${event.code}${this.idMasks.nodeLabel.key}`;
-        document.getElementById(keyId).classList.value = `${key}`;
-        return ;
+        const key = event.code;
+        switch(key) {
+          case this.keys.Tab.code:
+            event.preventDefault();
+            this.functions.updateButtonClass(event.code);
+            break;
+          case this.keys.CapsLock.code:
+            this.functions.updateButtonClass(event.code, this[key]);
+            break;
+          default:
+            this.functions.updateButtonClass(event.code);
+            break;
+
+        }
       }
 
-      this.events.focusout = () => {
+      this.events.focusout = (event) => {
+        event.preventDefault();
         for (const keyName of this.keyOrder) {
-          const key = (this.keys[keyName].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
-          const keyId = `${keyName}${this.idMasks.nodeLabel.key}`;
-          document.getElementById(keyId).classList.value = `${key}`;
+          this.functions.updateButtonClass(keyName);
         }
-        return ;
+
       }
 
     }
     
-    resetSequenceKeys() {
-      const keyList = [
+    sequenceKeys(type = 'reset', values = {}) {
+      const resetKeys = [
         this.keys.ShiftLeft.code,
         this.keys.ShiftRight.code,
         this.keys.ControlLeft.code,
         this.keys.ControlRight.code,
         this.keys.AltLeft.code,
-        this.keys.AltRight.code
+        this.keys.AltRight.code,
       ];
-      
+      const updateKeys = [
+        this.keys.CapsLock.code
+      ];
+      const keyList = (type === 'reset') ? resetKeys : updateKeys;
       for (const key of keyList) {
-        this[key] = false;
-        document.getElementById(`${key}${this.idMasks.nodeLabel.key}`).classList.value = this.classes.nodeLabel.keyOption;
+        this[key] = (type === 'reset') ? false : values[key];
+        // document.getElementById(`${key}${this.idMasks.nodeLabel.key}`).classList.value = this.classes.nodeLabel.keyOption;
       }
         
       return this;
