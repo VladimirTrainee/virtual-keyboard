@@ -69,9 +69,9 @@ export class KeyBoard {
         const label = (inverse) ? value : String(value).charAt(this.languageIndex);
         const keyWidth = `${Number(width) * this.button.width.value}${this.button.width.type}`;
         const keyHeight = `${this.button.height.value}${this.button.height.type}`;
-        // '50px';
+        const buttonClass = (inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
 
-        this.domNode.addNode({ tag: this.tags.nodeName.button, className: ((inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain), id: `${code}${this.idMasks.nodeLabel.key}` })
+        this.domNode.addNode({ tag: this.tags.nodeName.button, className: buttonClass, id: `${code}${this.idMasks.nodeLabel.key}` })
          .setStyle({ width: keyWidth, height: keyHeight })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
