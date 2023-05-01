@@ -34,7 +34,15 @@ export class KeyBoard {
         document.getElementById(keyId).classList.value = `${key}`;
         return ;
       }
-      
+
+      this.events.focusout = () => {
+        for (const keyName of this.keyOrder) {
+          const key = (this.keys[keyName].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
+          const keyId = `${keyName}${this.idMasks.nodeLabel.key}`;
+          document.getElementById(keyId).classList.value = `${key}`;
+        }
+        return ;
+      }
 
     }
     
@@ -74,6 +82,7 @@ export class KeyBoard {
         .addNode({ tag: this.tags.nodeName.textarea, className : this.classes.nodeLabel.keyboardInput, id: this.idMasks.nodeLabel.keyboard })
         .setEvent({ name: 'keydown', function: this.events.keydown })
         .setEvent({ name: 'keyup', function: this.events.keyup })
+        .setEvent({ name: 'focusout', function: this.events.focusout })
         .setParent();
       for (let key of this.keyOrder) {
         const  {
