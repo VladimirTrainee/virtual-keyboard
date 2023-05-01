@@ -6,11 +6,13 @@ export class KeyBoard {
       this.tags = new NodeList(['form', 'div', 'textarea', 'button', 'span', 'sup']);
       this.classes = new NodeList(['board', 'keyboardInput', 'textMain', 'textAlt', 'keyMain', 'keyOption'], ['board', 'keyboard-input', 'text-main', 'text-alt', 'key-main', 'key-option']);
       this.idMasks = new NodeList(['board', 'keyboard', 'text', 'key', 'pressed', 'digit'], ['board', 'keyboard-input', '-text', '-button', '-pressed', 'Digit']);
+      this.infoText = 'Shift + Alt to switch between English and Russian';
       this.button = { width: { value: 6.3, type: '%' }, height: { value: '50', type: 'px' }, space: ' ', tab: '	' }
       this.CapsLock = false;
       this.ShiftLeft = false;
       this.ShiftRight = false;
       this.keyOrder = [];
+      this.keyBuffer = [];
       this.keys = Object.fromEntries(keys.map((key, index) => { 
         const keyDetails = { ...key, order: index };
         this.keyOrder.push(key.code);
@@ -43,7 +45,7 @@ export class KeyBoard {
       }
 
       this.functions.updateButtonClass = (keyCode, pressed = false) => {
-        if (!keyCode) return;
+        if (!keyCode || !this.keys[keyCode]) return;
         const keyName = (this.keys[keyCode].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
         const element = this.functions.getButton(keyCode);
         const pressedMask = (pressed) ? this.idMasks.nodeLabel.pressed : '';
@@ -53,12 +55,15 @@ export class KeyBoard {
       }
 
       this.functions.moveSelector = (input, arrow, shift) => {
-        console.log(input.selectionStart, input.selectionEnd, shift, this.lastArrow );
+        let startLine;
+        let firstPrevLine;
+        let firstNextLine;
+        let position;
+        let index;
         
         if (shift) {
           switch (arrow) {
             case this.keys.ArrowLeft.code:
-                console.log('left ', this.lastArrow );
               if (this.lastArrow === this.keys.ArrowLeft.code && input.selectionStart -1 >= 0) { input.selectionEnd--; }
               if ((!this.lastArrow || this.lastArrow === this.keys.ArrowRight.code) && input.selectionStart -1 >= 0) { input.selectionStart--; }
               break;
@@ -67,10 +72,7 @@ export class KeyBoard {
               if (!this.lastArrow || this.lastArrow === this.keys.ArrowRight.code) { input.selectionStart++; }
               break;
           }
-          // if (this.lastArrow === this.keys.ArrowLeft.code) input.selectionEnd++;
-          // if ((this.lastArrow === this.keys.ArrowRight.code) && input.selectionStart -1 >= 0) input.selectionStart--;
-
-           // input.selectionEnd = input.selectionStart;
+          
         } else {
           switch (arrow) {
             case this.keys.ArrowLeft.code:
@@ -80,10 +82,25 @@ export class KeyBoard {
               input.selectionStart++;
               break;
             case this.keys.ArrowUp.code:
-              if (input.selectionStart -1 >= 0) { input.selectionStart--; }
+              startLine = input.value.substring(0, input.selectionStart).lastIndexOf('\n') + 1;
+              startLine = (firstPrevLine <= 0) ? 0 : startLine;
+              position =  input.selectionStart - startLine;
+              if (this.lastPosition && this.keyBuffer[this.keyBuffer.length - 1] === arrow ) { position = this.lastPosition; }
+              firstPrevLine = input.value.substring(0, startLine - 1).lastIndexOf('\n') + 1;
+              index = ((firstPrevLine <= 0) ? 0 : firstPrevLine);
+              if (startLine <= index + position) { position = startLine - index - 1; }
+              input.selectionStart = index + position;
+              if (this.keyBuffer[this.keyBuffer.length - 1] !== arrow || position === undefined)  this.lastPosition = position;
               break;
             case this.keys.ArrowDown.code:
-              input.selectionStart++;
+              startLine = input.value.substring(0, input.selectionStart).lastIndexOf('\n') + 1;
+              startLine = (firstPrevLine <= 0) ? 0 : startLine;
+              position =  input.selectionStart - startLine;
+              this.lastPosition = (this.lastKey !== arrow) ? position : undefined;
+              if (this.lastPosition) { position = this.lastPosition; }
+              firstNextLine = Math.max(0, input.value.indexOf('\n', input.selectionStart + 1) + 1);
+              index = ((firstNextLine <= 0) ? input.value.length : firstNextLine)
+              input.selectionStart = index + position;
               break;
             
           }
@@ -91,7 +108,6 @@ export class KeyBoard {
           input.selectionEnd = input.selectionStart;
 
         }
-        console.log('end ', input.selectionStart, input.selectionEnd, shift, this.lastArrow );
 
       }
 
@@ -110,6 +126,11 @@ export class KeyBoard {
       this.events.keydown = (event) => {
         const key = event.code;
         this.currentKey = key;
+        this.keyBuffer.push(key);
+        if (this.keyBuffer.length > 20) {
+          for (let i = 0; i < 10; i++) this.keyBuffer.shift();  
+        }
+        
         switch(key) {
           case this.keys.Tab.code:
             event.preventDefault();
@@ -123,6 +144,10 @@ export class KeyBoard {
             this.functions.updateButtonClass(key, true);
             break;
 
+        }
+        if (event.shiftKey === true && event.altKey === true) {
+          this.nextLanguage();
+          this.functions.updateButtonClass(this.keys.Language.code, false );  
         }
         this.lastKey = key;
         this.lastKeyDown = true;
@@ -149,11 +174,16 @@ export class KeyBoard {
       this.events.focusout = (event) => {
         event.preventDefault();
         if (!this.functions.isArrow(this.currentKey) && this.lastKey !== this.keys.ShiftLeft.code && this.lastKey !== this.keys.ShiftRight.code) {
-           // console.log('@', this.lastKey, this.lastArrow, this.currentKey);
           for (const keyName of this.keyOrder) {
             this.functions.updateButtonClass(keyName, false);
           }
         }
+
+      }
+      this.events.keyboardClick = (event) => {
+        event.preventDefault();
+        this.lastKey = undefined;
+        this.lastPosition = undefined;
 
       }
 
@@ -170,7 +200,12 @@ export class KeyBoard {
         let index;
         let updateClass = true;
         this.currentKey = key;
+        this.keyBuffer.push(key);
+        if (this.keyBuffer.length > 20) {
+          for (let i = 0; i < 10; i++) this.keyBuffer.shift();  
+        }
         button.focus();
+
         switch (key) {
           case this.keys.Language.code:
             this.nextLanguage();
@@ -217,7 +252,6 @@ export class KeyBoard {
             index = Math.min(values?.length - 1, this.languageIndex);
             value = values[index];
             input.value += value;
-           //  if (this.functions.isArrow(key) === false) { this.sequenceKeys('reset'); }
             break;
 
         }
@@ -225,7 +259,6 @@ export class KeyBoard {
         this.lastKey = key;
         this.lastKeyDown = true;
         this.lastArrow = (this.functions.isArrow(key) && (this.lastArrow === undefined)) ? key : undefined;
-        console.log('end',key);
       }
 
       this.events.mouseup = (event) => {
@@ -242,7 +275,6 @@ export class KeyBoard {
           case this.keys.ControlRight.code:
           case this.keys.AltLeft.code:
           case this.keys.AltRight.code:
-           // this.functions.updateButtonClass(key, this[key]);
             break;
           default:
             this.functions.updateButtonClass(key, false);
@@ -291,7 +323,7 @@ export class KeyBoard {
     }
   
     createNode() {
-      this.domNode.addNode({ tag: this.tags.nodeName.div, className: this.classes.nodeName.board })
+      this.domNode.addNode({ tag: this.tags.nodeName.div, className: this.classes.nodeName.board, innerText: this.infoText } )
         .setNewParent()
         .addNode({ tag: this.tags.nodeName.form })
         .setNewParent()
@@ -299,6 +331,7 @@ export class KeyBoard {
         .setEvent({ name: 'keydown', function: this.events.keydown })
         .setEvent({ name: 'keyup', function: this.events.keyup })
         .setEvent({ name: 'focusout', function: this.events.focusout })
+        .setEvent({ name: 'click', function: this.events.keyboardClick })
         .setParent();
       for (let key of this.keyOrder) {
         const  {
@@ -320,6 +353,7 @@ export class KeyBoard {
           .setEvent({ name: 'mousedown', function: this.events.mousedown})
           .setEvent({ name: 'mouseup', function: this.events.mouseup })
           .setEvent({ name: 'mouseout', function: this.events.mouseout })
+          .setEvent({ name: 'keydown', function: this.events.keydown })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
           this.domNode.addNode({ tag: this.tags.nodeName.sup, className: this.classes.nodeLabel.textAlt, innerText: shiftValue });
