@@ -1,0 +1,79 @@
+.board {
+  width: 600px;
+   border: 1px solid rgb(32, 47, 165); 
+}
+
+.board:focus {
+  border: 1px solid rgb(255, 0, 0); 
+}
+
+.keyboard-input {
+  font-weight: 1000;
+  width: 97%;
+  height: 100px;
+  padding: 1%;
+  outline: 0;
+}
+.keyboard-input:focus {
+  outline: 0;
+
+}
+
+.key-main,
+.key-option {
+  outline: 0;
+  border: 4px outset #FFF;
+  background-color: #777;
+  cursor: pointer;
+  display: inline-block;
+  height: 1px;
+  padding: 1.2% 0.4% 1.2% 0.4%;
+}
+
+.key-option {
+  background-color: #555;
+}
+
+.key-main:hover,
+.key-option:hover,
+.key-main:focus,
+.key-option:focus {
+
+}
+
+.key-main-pressed,
+.key-option-pressed {
+  outline: 0;
+  border: 4px inset #FFF;
+  background-color: #999;
+  cursor: pointer;
+  display: inline-block;
+  height: 1px;
+  padding: 1.2% 0.4% 1.2% 0.4%;  
+  padding-left: 5px;
+  border: 4px inset #555; 
+}
+
+.key-option-pressed {
+  border: 4px inset #888; 
+}
+
+.text-main {
+  font-weight: 1000;
+  font-size: 100%; 
+  line-height: 200%; 
+  color:white;
+  padding: 0%;
+  vertical-align: middle; 
+  display:inline-block;
+  height: 100%;
+}
+
+.text-alt {
+  font-weight: 700;
+  font-size: 80%; 
+  padding: 0 10% 0 0%;
+  color:white;
+  vertical-align: top; 
+  display:inline-block;
+}
