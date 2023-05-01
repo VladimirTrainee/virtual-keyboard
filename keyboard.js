@@ -55,6 +55,7 @@ export class KeyBoard {
       }
 
       this.functions.moveSelector = (input, arrow, shift) => {
+        const trigger = { start: 'Start', end: 'End'};
         let startLine;
         let firstPrevLine;
         //let secondPrevLine;
@@ -80,6 +81,15 @@ export class KeyBoard {
            // input.selectionEnd = input.selectionStart;
         } else {
           switch (arrow) {
+            case trigger.start:
+              startLine = input.value.substring(0, input.selectionStart).lastIndexOf('\n') + 1;
+              startLine = (firstPrevLine <= 0) ? 0 : startLine;
+              input.selectionStart = startLine;
+              break;
+            case trigger.end:
+              firstNextLine = Math.max(0, input.value.indexOf('\n', input.selectionStart + 1) + 1);
+              input.selectionStart = firstNextLine - 1;
+              break;
             case this.keys.ArrowLeft.code:
               if (input.selectionStart -1 >= 0) { input.selectionStart--; }
               break;
@@ -234,6 +244,7 @@ export class KeyBoard {
             navigator.clipboard.writeText(input.value.substring(input.selectionStart, input.selectionEnd));
             sequenceKey = true;
           }
+
           if (this.keyBuffer.length >= 2 && this.keyBuffer[this.keyBuffer.length - 1] === 'KeyV') {
             navigator.clipboard.readText().then(function(text) {
                 const index = input.selectionStart;
@@ -242,6 +253,16 @@ export class KeyBoard {
                 input.selectionEnd = index;
               });
             sequenceKey = true;
+          }
+          if (this.keyBuffer.length >= 2 && this.keyBuffer[this.keyBuffer.length - 1] === this.keys.ArrowLeft.code) {
+            this.functions.moveSelector(input, 'Start', this.ShiftLeft || this.ShiftRight);
+            sequenceKey = true;
+            this.sequenceKeys('reset');
+          }
+          if (this.keyBuffer.length >= 2 && this.keyBuffer[this.keyBuffer.length - 1] === this.keys.ArrowRight.code) {
+            this.functions.moveSelector(input, 'End', this.ShiftLeft || this.ShiftRight);
+             sequenceKey = true;
+            this.sequenceKeys('reset'); 
           }
         }
 
@@ -294,7 +315,7 @@ export class KeyBoard {
             if (sequenceKey === false) { 
               input.value += value;
             }
-           // if (this.functions.isArrow(key) === false) { this.sequenceKeys('reset'); }
+            if (this.functions.isArrow(key) === false) { this.sequenceKeys('reset'); }
             break;
 
         }
