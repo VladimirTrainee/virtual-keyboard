@@ -22,8 +22,8 @@
 
 }
 
-.key-button,
-.key-button2 {
+.key-main,
+.key-option {
   border: 4px outset #FFF;
   background-color: #777;
   cursor: pointer;
@@ -32,19 +32,19 @@
   padding: 1.2% 0.4% 1.2% 0.4%; 
 }
 
-.key-button2 {
+.key-option {
   background-color: #555;
 }
 
-.key-button:hover,
-.key-button2:hover,
-.key-button:focus,
-.key-button2:focus {
+.key-main:hover,
+.key-option:hover,
+.key-main:focus,
+.key-option:focus {
 
 }
 
-.key-button-pressed,
-.key-button2-pressed {
+.key-main-pressed,
+.key-option-pressed {
   border: 4px inset #FFF;
   background-color: #999;
   cursor: pointer;
@@ -55,11 +55,11 @@
   border: 4px inset #555; 
 }
 
-.key-button2-pressed {
+.key-option-pressed {
   border: 4px inset #888; 
 }
 
-.key-main {
+.text-main {
   font-weight: 1000;
   font-size: 100%; 
   line-height: 200%; 
@@ -70,7 +70,7 @@
   height: 100%;
 }
 
-.key-small {
+.text-alt {
   font-weight: 700;
   font-size: 80%; 
   padding: 0 10% 0 0%;
