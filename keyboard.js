@@ -57,7 +57,9 @@ export class KeyBoard {
       this.functions.moveSelector = (input, arrow, shift) => {
         let startLine;
         let firstPrevLine;
+        //let secondPrevLine;
         let firstNextLine;
+        //let secondNextLine;
         let position;
         let index;
         
@@ -72,7 +74,10 @@ export class KeyBoard {
               if (!this.lastArrow || this.lastArrow === this.keys.ArrowRight.code) { input.selectionStart++; }
               break;
           }
-          
+          // if (this.lastArrow === this.keys.ArrowLeft.code) input.selectionEnd++;
+          // if ((this.lastArrow === this.keys.ArrowRight.code) && input.selectionStart -1 >= 0) input.selectionStart--;
+
+           // input.selectionEnd = input.selectionStart;
         } else {
           switch (arrow) {
             case this.keys.ArrowLeft.code:
@@ -85,12 +90,18 @@ export class KeyBoard {
               startLine = input.value.substring(0, input.selectionStart).lastIndexOf('\n') + 1;
               startLine = (firstPrevLine <= 0) ? 0 : startLine;
               position =  input.selectionStart - startLine;
+             // if (this.keyBuffer[this.keyBuffer.length - 1] !== arrow || position === undefined)  this.lastPosition = position;
+              // this.lastPosition = (this.keyBuffer[this.keyBuffer.length - 1] === arrow && this.lastPosition === undefined) ? position : undefined;
               if (this.lastPosition && this.keyBuffer[this.keyBuffer.length - 1] === arrow ) { position = this.lastPosition; }
               firstPrevLine = input.value.substring(0, startLine - 1).lastIndexOf('\n') + 1;
+              //secondPrevLine = input.value.substring(0, firstPrevLine - 1).lastIndexOf('\n') + 1;
               index = ((firstPrevLine <= 0) ? 0 : firstPrevLine);
+              // position = Math.min(position, startLine - 1);
               if (startLine <= index + position) { position = startLine - index - 1; }
               input.selectionStart = index + position;
               if (this.keyBuffer[this.keyBuffer.length - 1] !== arrow || position === undefined)  this.lastPosition = position;
+              // + position;
+              // Math.min(position, startLine -1);
               break;
             case this.keys.ArrowDown.code:
               startLine = input.value.substring(0, input.selectionStart).lastIndexOf('\n') + 1;
@@ -99,6 +110,8 @@ export class KeyBoard {
               this.lastPosition = (this.lastKey !== arrow) ? position : undefined;
               if (this.lastPosition) { position = this.lastPosition; }
               firstNextLine = Math.max(0, input.value.indexOf('\n', input.selectionStart + 1) + 1);
+              //secondNextLine = input.value.indexOf('\n', firstNextLine + 1) + 1;
+              // if (secondNextLine <= index + position) { position = secondNextLine - index - 3; }
               index = ((firstNextLine <= 0) ? input.value.length : firstNextLine)
               input.selectionStart = index + position;
               break;
@@ -130,7 +143,6 @@ export class KeyBoard {
         if (this.keyBuffer.length > 20) {
           for (let i = 0; i < 10; i++) this.keyBuffer.shift();  
         }
-        
         switch(key) {
           case this.keys.Tab.code:
             event.preventDefault();
@@ -174,6 +186,7 @@ export class KeyBoard {
       this.events.focusout = (event) => {
         event.preventDefault();
         if (!this.functions.isArrow(this.currentKey) && this.lastKey !== this.keys.ShiftLeft.code && this.lastKey !== this.keys.ShiftRight.code) {
+           // console.log('@', this.lastKey, this.lastArrow, this.currentKey);
           for (const keyName of this.keyOrder) {
             this.functions.updateButtonClass(keyName, false);
           }
@@ -199,12 +212,38 @@ export class KeyBoard {
         let value;
         let index;
         let updateClass = true;
+        let sequenceKey = false;
+
         this.currentKey = key;
         this.keyBuffer.push(key);
         if (this.keyBuffer.length > 20) {
           for (let i = 0; i < 10; i++) this.keyBuffer.shift();  
         }
         button.focus();
+        
+        if (
+          this.keyBuffer[this.keyBuffer.length - 2] === this.keys.ControlLeft.code || 
+          this.keyBuffer[this.keyBuffer.length - 2] === this.keys.ControlRight.code
+          ) {
+          if (this.keyBuffer.length >= 2 && this.keyBuffer[this.keyBuffer.length - 1] === 'KeyX') {
+            this.functions.updateSelector(input, -1);
+            sequenceKey = true;
+          }
+
+          if (this.keyBuffer.length >= 2 && this.keyBuffer[this.keyBuffer.length - 1] === 'KeyC') {
+            navigator.clipboard.writeText(input.value.substring(input.selectionStart, input.selectionEnd));
+            sequenceKey = true;
+          }
+          if (this.keyBuffer.length >= 2 && this.keyBuffer[this.keyBuffer.length - 1] === 'KeyV') {
+            navigator.clipboard.readText().then(function(text) {
+                const index = input.selectionStart;
+                input.value = input.value.substring(0, index) + text + input.value.substring(input.selectionEnd);
+                input.selectionStart = index;
+                input.selectionEnd = index;
+              });
+            sequenceKey = true;
+          }
+        }
 
         switch (key) {
           case this.keys.Language.code:
@@ -229,6 +268,7 @@ export class KeyBoard {
             this.functions.updateSelector(input, 0, '\n');
             break;
           case this.keys.MetaLeft.code:
+            // document.dispatchEvent(new KeyboardEvent('keypress', {key: 'Meta', code: this.keys.MetaLeft.code}));
             break;
           case this.keys.Tab.code:
             this.functions.updateSelector(input, 0, this.button.tab);
@@ -251,7 +291,10 @@ export class KeyBoard {
             values = (shiftCase) ? this.keys[key].value : this.keys[key].shiftValue;
             index = Math.min(values?.length - 1, this.languageIndex);
             value = values[index];
-            input.value += value;
+            if (sequenceKey === false) { 
+              input.value += value;
+            }
+           //  if (this.functions.isArrow(key) === false) { this.sequenceKeys('reset'); }
             break;
 
         }
@@ -275,6 +318,7 @@ export class KeyBoard {
           case this.keys.ControlRight.code:
           case this.keys.AltLeft.code:
           case this.keys.AltRight.code:
+           // this.functions.updateButtonClass(key, this[key]);
             break;
           default:
             this.functions.updateButtonClass(key, false);
@@ -353,7 +397,6 @@ export class KeyBoard {
           .setEvent({ name: 'mousedown', function: this.events.mousedown})
           .setEvent({ name: 'mouseup', function: this.events.mouseup })
           .setEvent({ name: 'mouseout', function: this.events.mouseout })
-          .setEvent({ name: 'keydown', function: this.events.keydown })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
           this.domNode.addNode({ tag: this.tags.nodeName.sup, className: this.classes.nodeLabel.textAlt, innerText: shiftValue });
