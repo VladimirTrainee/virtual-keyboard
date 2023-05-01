@@ -88,6 +88,18 @@ export class KeyBoard {
     nextLanguage() {
       this.languageIndex++;
       this.languageIndex %= this.languages.length;
+
+      for (let key of this.keyOrder) {
+        const { code, inverse = false, value = this.languages[this.languageIndex] } = this.keys[key];
+        const keyId = `${code}${this.idMasks.nodeLabel.text}`;
+        const index = Math.min(value.length - 1, this.languageIndex);
+        const keyText = (inverse) ? value : String(value).charAt(index);
+        if (inverse === false) {
+          document.getElementById(keyId).innerText = keyText;
+        } else if (code === this.keys.Language.code) {
+          document.getElementById(keyId).innerText = this.languages[index];
+        }
+      }
       return this;
     }
   }
