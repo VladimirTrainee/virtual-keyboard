@@ -106,6 +106,7 @@ export class KeyBoard {
             index = Math.min(values?.length - 1, this.languageIndex);
             value = values[index];
             input.value += value;
+            this.sequenceKeys('reset');
 
             this.functions.updateButtonClass(key, true);
             break;
@@ -149,7 +150,7 @@ export class KeyBoard {
       const keyList = (type === 'reset') ? resetKeys : updateKeys;
       for (const key of keyList) {
         this[key] = (type === 'reset') ? false : values[key];
-        // document.getElementById(`${key}${this.idMasks.nodeLabel.key}`).classList.value = this.classes.nodeLabel.keyOption;
+        this.functions.updateButtonClass(key, this[key] );
       }
         
       return this;
