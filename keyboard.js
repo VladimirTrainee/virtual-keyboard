@@ -58,9 +58,8 @@ export class KeyBoard {
         const trigger = { start: 'Start', end: 'End'};
         let startLine;
         let firstPrevLine;
-        //let secondPrevLine;
         let firstNextLine;
-        //let secondNextLine;
+        let secondNextLine;
         let position;
         let index;
         
@@ -75,10 +74,10 @@ export class KeyBoard {
               if (!this.lastArrow || this.lastArrow === this.keys.ArrowRight.code) { input.selectionStart++; }
               break;
           }
-          // if (this.lastArrow === this.keys.ArrowLeft.code) input.selectionEnd++;
-          // if ((this.lastArrow === this.keys.ArrowRight.code) && input.selectionStart -1 >= 0) input.selectionStart--;
+           if (this.lastArrow === this.keys.ArrowLeft.code) input.selectionEnd++;
+           if ((this.lastArrow === this.keys.ArrowRight.code) && input.selectionStart -1 >= 0) input.selectionStart--;
 
-           // input.selectionEnd = input.selectionStart;
+           input.selectionEnd = input.selectionStart;
         } else {
           switch (arrow) {
             case trigger.start:
@@ -97,32 +96,30 @@ export class KeyBoard {
               input.selectionStart++;
               break;
             case this.keys.ArrowUp.code:
+              if (this.keyBuffer.length > 1 && this.keyBuffer[this.keyBuffer.length - 1] !== this.keyBuffer[this.keyBuffer.length - 2]) this.lastPosition = undefined;
               startLine = input.value.substring(0, input.selectionStart).lastIndexOf('\n') + 1;
               startLine = (firstPrevLine <= 0) ? 0 : startLine;
               position =  input.selectionStart - startLine;
-             // if (this.keyBuffer[this.keyBuffer.length - 1] !== arrow || position === undefined)  this.lastPosition = position;
-              // this.lastPosition = (this.keyBuffer[this.keyBuffer.length - 1] === arrow && this.lastPosition === undefined) ? position : undefined;
-              if (this.lastPosition && this.keyBuffer[this.keyBuffer.length - 1] === arrow ) { position = this.lastPosition; }
+              if (!this.lastPosition) { 
+                this.lastPosition = position; 
+              } else  { position = this.lastPosition; }
               firstPrevLine = input.value.substring(0, startLine - 1).lastIndexOf('\n') + 1;
-              //secondPrevLine = input.value.substring(0, firstPrevLine - 1).lastIndexOf('\n') + 1;
               index = ((firstPrevLine <= 0) ? 0 : firstPrevLine);
-              // position = Math.min(position, startLine - 1);
               if (startLine <= index + position) { position = startLine - index - 1; }
               input.selectionStart = index + position;
-              if (this.keyBuffer[this.keyBuffer.length - 1] !== arrow || position === undefined)  this.lastPosition = position;
-              // + position;
-              // Math.min(position, startLine -1);
               break;
             case this.keys.ArrowDown.code:
+              if (this.keyBuffer.length > 1 && this.keyBuffer[this.keyBuffer.length - 1] !== this.keyBuffer[this.keyBuffer.length - 2]) this.lastPosition = undefined;
               startLine = input.value.substring(0, input.selectionStart).lastIndexOf('\n') + 1;
               startLine = (firstPrevLine <= 0) ? 0 : startLine;
               position =  input.selectionStart - startLine;
-              this.lastPosition = (this.lastKey !== arrow) ? position : undefined;
-              if (this.lastPosition) { position = this.lastPosition; }
-              firstNextLine = Math.max(0, input.value.indexOf('\n', input.selectionStart + 1) + 1);
-              //secondNextLine = input.value.indexOf('\n', firstNextLine + 1) + 1;
-              // if (secondNextLine <= index + position) { position = secondNextLine - index - 3; }
-              index = ((firstNextLine <= 0) ? input.value.length : firstNextLine)
+              if (!this.lastPosition) { 
+                this.lastPosition = position; 
+              } else  { position = this.lastPosition; }
+              firstNextLine = Math.max(0, input.value.indexOf('\n', input.selectionStart) + 1);
+              secondNextLine = input.value.indexOf('\n', firstNextLine ) + 1;
+              index = ((firstNextLine <= 0) ? input.value.length: firstNextLine);
+              if (secondNextLine <= index + position) { position = secondNextLine - index - 1; }
               input.selectionStart = index + position;
               break;
             
@@ -196,7 +193,6 @@ export class KeyBoard {
       this.events.focusout = (event) => {
         event.preventDefault();
         if (!this.functions.isArrow(this.currentKey) && this.lastKey !== this.keys.ShiftLeft.code && this.lastKey !== this.keys.ShiftRight.code) {
-           // console.log('@', this.lastKey, this.lastArrow, this.currentKey);
           for (const keyName of this.keyOrder) {
              if (keyName !== this.keys.CapsLock.code) this.functions.updateButtonClass(keyName, false);
           }
@@ -289,7 +285,7 @@ export class KeyBoard {
             this.functions.updateSelector(input, 0, '\n');
             break;
           case this.keys.MetaLeft.code:
-            // document.dispatchEvent(new KeyboardEvent('keypress', {key: 'Meta', code: this.keys.MetaLeft.code}));
+            document.dispatchEvent(new KeyboardEvent('keypress', {key: 'Meta', code: this.keys.MetaLeft.code}));
             break;
           case this.keys.Tab.code:
             this.functions.updateSelector(input, 0, this.button.tab);
