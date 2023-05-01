@@ -5,7 +5,7 @@ export class KeyBoard {
     constructor(keys = []) {
       this.tags = new NodeList(['form', 'div', 'textarea', 'button', 'span', 'sup']);
       this.classes = new NodeList(['board', 'keyboardInput', 'textMain', 'textAlt', 'keyMain', 'keyOption'], ['board', 'keyboard-input', 'text-main', 'text-alt', 'key-main', 'key-option']);
-      this.idMasks = new NodeList(['board', 'keyboard', 'text', 'key', 'pressed'], ['board', 'keyboard-input', '-text', '-button', '-pressed']);
+      this.idMasks = new NodeList(['board', 'keyboard', 'text', 'key', 'pressed', 'digit'], ['board', 'keyboard-input', '-text', '-button', '-pressed', 'Digit']);
       this.button = { width: { value: 6.3, type: '%' }, height: { value: '50', type: 'px' } }
       this.CapsLock = false;
       this.ShiftLeft = false;
@@ -75,6 +75,14 @@ export class KeyBoard {
 
       this.events.mousedown = (event) => {
         const key = event.currentTarget.id.split('-')[0];
+        const input = document.getElementById(this.idMasks.nodeLabel.keyboard);
+        let shift;
+        let shiftCase;
+        let values;
+        let value;
+        let index;
+
+
 
         switch (key) {
           case this.keys.Language.code:
@@ -92,9 +100,17 @@ export class KeyBoard {
             this.functions.updateButtonClass(key, this[key]);
             break;
           default:
+            shift = (this.ShiftLeft || this.ShiftRight) ? true : false;
+            shiftCase = (String(key).startsWith(this.idMasks.nodeLabel.digit)) ? !shift : (this.CapsLock && !shift) || (!this.CapsLock && shift) ;
+            values = (shiftCase) ? this.keys[key].value : this.keys[key].shiftValue;
+            index = Math.min(values?.length - 1, this.languageIndex);
+            value = values[index];
+            input.value += value;
+
             this.functions.updateButtonClass(key, true);
             break;
         }
+        this.lastKey = key;
       }
 
       this.events.mouseup = (event) => {
