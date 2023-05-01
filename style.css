@@ -12,24 +12,22 @@
   width: 97%;
   height: 100px;
   padding: 1%;
+  outline: 0;
 }
 .keyboard-input:focus {
-  color:red;
-  background-color: aqua;
-  border: 1px solid red;
-  border-left-color: green;
-  border-width: 1px;
+  outline: 0;
 
 }
 
 .key-main,
 .key-option {
+  outline: 0;
   border: 4px outset #FFF;
   background-color: #777;
   cursor: pointer;
   display: inline-block;
   height: 1px;
-  padding: 1.2% 0.4% 1.2% 0.4%; 
+  padding: 1.2% 0.4% 1.2% 0.4%;
 }
 
 .key-option {
@@ -45,6 +43,7 @@
 
 .key-main-pressed,
 .key-option-pressed {
+  outline: 0;
   border: 4px inset #FFF;
   background-color: #999;
   cursor: pointer;

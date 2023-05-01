@@ -6,14 +6,14 @@ export class KeyBoard {
       this.tags = new NodeList(['form', 'div', 'textarea', 'button', 'span', 'sup']);
       this.classes = new NodeList(['board', 'keyboardInput', 'textMain', 'textAlt', 'keyMain', 'keyOption'], ['board', 'keyboard-input', 'text-main', 'text-alt', 'key-main', 'key-option']);
       this.idMasks = new NodeList(['board', 'keyboard', 'text', 'key', 'pressed', 'digit'], ['board', 'keyboard-input', '-text', '-button', '-pressed', 'Digit']);
-      this.button = { width: { value: 6.3, type: '%' }, height: { value: '50', type: 'px' } }
+      this.button = { width: { value: 6.3, type: '%' }, height: { value: '50', type: 'px' }, space: ' ', tab: '	' }
       this.CapsLock = false;
       this.ShiftLeft = false;
       this.ShiftRight = false;
       this.keyOrder = [];
       this.keys = Object.fromEntries(keys.map((key, index) => { 
         const keyDetails = { ...key, order: index };
-        this.keyOrder.push(key.code); 
+        this.keyOrder.push(key.code);
         return [key.code, keyDetails];
       }));
   
@@ -21,13 +21,31 @@ export class KeyBoard {
       this.languageIndex = 0;
       this.events = {};
       this.functions = {};
-
-      this.functions.updateButtonClass = (keyCode, pressed = false) => {
-        const keyName = (this.keys[keyCode].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
+      this.functions.getButton = (keyCode) => {
         const keyId = `${keyCode}${this.idMasks.nodeLabel.key}`;
         const element = (keyId) ? document.getElementById(keyId) : undefined;
+        return element;
+      }
+      this.functions.updateButtonClass = (keyCode, pressed = false) => {
+        if (!keyCode) return;
+        const keyName = (this.keys[keyCode].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
+        const element = this.functions.getButton(keyCode);
         const pressedMask = (pressed) ? this.idMasks.nodeLabel.pressed : '';
-        if (element) element.classList.value = `${keyName}${pressedMask}`;
+        if (element) {
+           element.classList.value = `${keyName}${pressedMask}`;
+        }
+      }
+
+      this.functions.updateSelector = (input, offSet = 0, value = '') => {
+        const noSelection = (input.selectionStart === input.selectionEnd);
+        const valueStart = String(input.value).substring(0, input.selectionStart + ((offSet < 0 && noSelection) ? offSet : 0) , input.selectionEnd);
+        const valueFinish = String(input.value).substring(input.selectionEnd  + ((offSet > 0  && noSelection) ? offSet : 0) );
+  
+        const position = input.selectionStart + String(value).length + ((offSet < 0  && noSelection) ? offSet : 0);
+        input.value = valueStart + value + valueFinish;
+        input.selectionStart = position;
+        input.selectionEnd = input.selectionStart;
+   
       }
       
       this.events.keydown = (event) => {
@@ -46,6 +64,8 @@ export class KeyBoard {
             break;
 
         }
+        this.lastKey = key;
+        this.lastKeyDown = true;
       }
 
       this.events.keyup = (event) => {
@@ -53,42 +73,44 @@ export class KeyBoard {
         switch(key) {
           case this.keys.Tab.code:
             event.preventDefault();
-            this.functions.updateButtonClass(key);
+            this.functions.updateButtonClass(key, false);
             break;
           case this.keys.CapsLock.code:
             this.functions.updateButtonClass(key, this[key]);
             break;
           default:
-            this.functions.updateButtonClass(key);
+            this.functions.updateButtonClass(key, false);
             break;
 
         }
+        this.lastKeyDown = false;
       }
 
       this.events.focusout = (event) => {
         event.preventDefault();
         for (const keyName of this.keyOrder) {
-          this.functions.updateButtonClass(keyName);
+          this.functions.updateButtonClass(keyName, false);
         }
 
       }
 
       this.events.mousedown = (event) => {
+        event.preventDefault();
+        
         const key = event.currentTarget.id.split('-')[0];
         const input = document.getElementById(this.idMasks.nodeLabel.keyboard);
+        const button = this.functions.getButton(key);
         let shift;
         let shiftCase;
         let values;
         let value;
         let index;
         let updateClass = true;
-
-
-
+        button.focus();
         switch (key) {
           case this.keys.Language.code:
             this.nextLanguage();
-            this.functions.updateButtonClass(key);
+            this.functions.updateButtonClass(key, false);
             break;
           case this.keys.CapsLock.code:
           case this.keys.ShiftLeft.code:
@@ -102,9 +124,12 @@ export class KeyBoard {
             this.functions.updateButtonClass(key, this[key]);
             break;
           case this.keys.Space.code:
+            this.functions.updateSelector(input, 0, this.button.space);
+            break;
           case this.keys.MetaLeft.code:
             break;
           case this.keys.Tab.code:
+            this.functions.updateSelector(input, 0, this.button.tab);
             break;  
           case this.keys.Backspace.code:
             break;
@@ -132,9 +157,13 @@ export class KeyBoard {
         }
         if (updateClass) { this.functions.updateButtonClass(key, true); }
         this.lastKey = key;
+        this.lastKeyDown = true;
       }
 
       this.events.mouseup = (event) => {
+
+        event.preventDefault();
+        const input = document.getElementById(this.idMasks.nodeLabel.keyboard);
         const key = event.currentTarget.id.split('-')[0];
 
         switch (key) {
@@ -148,13 +177,20 @@ export class KeyBoard {
            // this.functions.updateButtonClass(key, this[key]);
             break;
           default:
-            this.functions.updateButtonClass(key);
+            this.functions.updateButtonClass(key, false);
             break;
         }
+        input.focus();
+        this.lastKeyDown = false;
       }
-
+      this.events.mouseout = (event) => {
+        event.preventDefault();
+        if ( this.lastKeyDown) {
+          this.functions.updateButtonClass(this.lastKey, false);
+        }
+      }
     }
-    
+
     sequenceKeys(type = 'reset', values = {}) {
       const resetKeys = [
         this.keys.ShiftLeft.code,
@@ -170,7 +206,7 @@ export class KeyBoard {
       const keyList = (type === 'reset') ? resetKeys : updateKeys;
       for (const key of keyList) {
         this[key] = (type === 'reset') ? false : values[key];
-        this.functions.updateButtonClass(key, this[key] );
+        this.functions.updateButtonClass(key, this[key]);
       }
         
       return this;
@@ -215,7 +251,7 @@ export class KeyBoard {
           .setStyle({ width: keyWidth, height: keyHeight })
           .setEvent({ name: 'mousedown', function: this.events.mousedown})
           .setEvent({ name: 'mouseup', function: this.events.mouseup })
-          .setEvent({ name: 'mouseout', function: this.events.mouseup })
+          .setEvent({ name: 'mouseout', function: this.events.mouseout })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
           this.domNode.addNode({ tag: this.tags.nodeName.sup, className: this.classes.nodeLabel.textAlt, innerText: shiftValue });
