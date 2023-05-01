@@ -126,14 +126,19 @@ export class KeyBoard {
           case this.keys.Space.code:
             this.functions.updateSelector(input, 0, this.button.space);
             break;
+          case this.keys.Enter.code:
+            this.functions.updateSelector(input, 0, '\n');
+            break;
           case this.keys.MetaLeft.code:
             break;
           case this.keys.Tab.code:
             this.functions.updateSelector(input, 0, this.button.tab);
             break;  
           case this.keys.Backspace.code:
+            this.functions.updateSelector(input, -1);
             break;
           case this.keys.Delete.code:
+            this.functions.updateSelector(input, 1);
             break;
           case this.keys.ArrowLeft.code:
             break;
@@ -141,8 +146,6 @@ export class KeyBoard {
             break;
           case this.keys.ArrowUp.code:
           case this.keys.ArrowDown.code:
-            break;
-          case this.keys.Enter.code:
             break;
           default:
             shift = (this.ShiftLeft || this.ShiftRight) ? true : false;
