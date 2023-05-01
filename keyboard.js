@@ -1,7 +1,9 @@
 import {DomNode} from './domnode.js';
+import {NodeList} from './nodelist.js';
 
 export class KeyBoard {
     constructor(keys = []) {
+      this.tags = new NodeList(['form', 'div', 'textarea', 'button', 'span', 'sup']);
       this.CapsLock = false;
       this.ShiftLeft = false;
       this.ShiftRight = false;
@@ -45,11 +47,11 @@ export class KeyBoard {
     }
   
     createNode() {
-      this.domNode.addNode({ tag: 'div', className: 'board' })
+      this.domNode.addNode({ tag: this.tags.nodeName.div, className: 'board' })
         .setNewParent()
-        .addNode({ tag: 'form' })
+        .addNode({ tag: this.tags.nodeName.form })
         .setNewParent()
-        .addNode({ tag: 'textarea', className : 'keyboard-input', id: 'keyboard-input' })
+        .addNode({ tag: this.tags.nodeName.textarea, className : 'keyboard-input', id: 'keyboard-input' })
         .setParent();
       for (let key of this.keyOrder) {
         const  {
@@ -64,13 +66,13 @@ export class KeyBoard {
         const keyWidth = `${+width * 6.3}%`;
         const keyHeight = '50px';
 
-        this.domNode.addNode({ tag: 'button', className: ((inverse) ? 'key-button2' : 'key-button'), id: `${code}-button` })
+        this.domNode.addNode({ tag: this.tags.nodeName.button, className: ((inverse) ? 'key-button2' : 'key-button'), id: `${code}-button` })
           .setStyle({ width: keyWidth, height: keyHeight })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
-          this.domNode.addNode({ tag: 'sup', className: 'key-small', innerText: shiftValue });
+          this.domNode.addNode({ tag: this.tags.nodeName.sup, className: 'key-small', innerText: shiftValue });
         }
-        this.domNode.addNode({ tag: 'span', className: 'key-main', innerText: label, id: `${code}-label` })
+        this.domNode.addNode({ tag: this.tags.nodeName.span, className: 'key-main', innerText: label, id: `${code}-label` })
           .setParent();
 
       }

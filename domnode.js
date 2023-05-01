@@ -41,8 +41,8 @@ export class DomNode {
   setStyle(styles = {}) {
     const node = this.getNode();
 
-    for (const [style] of Object.entries(styles)) {
-      node[this.properties.STYLE][style] = styles[style]; 
+    for (const [styleX] of Object.entries(styles)) {
+      if (node && node[this.properties.STYLE]) node[this.properties.STYLE][styleX] = styles[styleX]; 
     }
 
     return this;
