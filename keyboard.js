@@ -188,7 +188,7 @@ export class KeyBoard {
         if (!this.functions.isArrow(this.currentKey) && this.lastKey !== this.keys.ShiftLeft.code && this.lastKey !== this.keys.ShiftRight.code) {
            // console.log('@', this.lastKey, this.lastArrow, this.currentKey);
           for (const keyName of this.keyOrder) {
-            this.functions.updateButtonClass(keyName, false);
+             if (keyName !== this.keys.CapsLock.code) this.functions.updateButtonClass(keyName, false);
           }
         }
 
@@ -294,7 +294,7 @@ export class KeyBoard {
             if (sequenceKey === false) { 
               input.value += value;
             }
-           //  if (this.functions.isArrow(key) === false) { this.sequenceKeys('reset'); }
+           // if (this.functions.isArrow(key) === false) { this.sequenceKeys('reset'); }
             break;
 
         }
@@ -318,7 +318,7 @@ export class KeyBoard {
           case this.keys.ControlRight.code:
           case this.keys.AltLeft.code:
           case this.keys.AltRight.code:
-           // this.functions.updateButtonClass(key, this[key]);
+            this.functions.updateButtonClass(key, this[key]);
             break;
           default:
             this.functions.updateButtonClass(key, false);
