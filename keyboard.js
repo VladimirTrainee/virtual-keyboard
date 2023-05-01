@@ -35,14 +35,14 @@ export class KeyBoard {
         switch(key) {
           case this.keys.Tab.code:
             event.preventDefault();
-            this.functions.updateButtonClass(event.code, true);
+            this.functions.updateButtonClass(key, true);
             break;
           case this.keys.CapsLock.code:
             this[key] = !this[key];
-            this.functions.updateButtonClass(event.code, this[key]);
+            this.functions.updateButtonClass(key, this[key]);
             break;
           default:
-            this.functions.updateButtonClass(event.code, true);
+            this.functions.updateButtonClass(key, true);
             break;
 
         }
@@ -53,13 +53,13 @@ export class KeyBoard {
         switch(key) {
           case this.keys.Tab.code:
             event.preventDefault();
-            this.functions.updateButtonClass(event.code);
+            this.functions.updateButtonClass(key);
             break;
           case this.keys.CapsLock.code:
-            this.functions.updateButtonClass(event.code, this[key]);
+            this.functions.updateButtonClass(key, this[key]);
             break;
           default:
-            this.functions.updateButtonClass(event.code);
+            this.functions.updateButtonClass(key);
             break;
 
         }
@@ -71,6 +71,49 @@ export class KeyBoard {
           this.functions.updateButtonClass(keyName);
         }
 
+      }
+
+      this.events.mousedown = (event) => {
+        const key = event.currentTarget.id.split('-')[0];
+
+        switch (key) {
+          case this.keys.Language.code:
+            this.nextLanguage();
+            this.functions.updateButtonClass(key);
+            break;
+          case this.keys.CapsLock.code:
+          case this.keys.ShiftLeft.code:
+          case this.keys.ShiftRight.code:
+          case this.keys.ControlLeft.code:
+          case this.keys.ControlRight.code:
+          case this.keys.AltLeft.code:
+          case this.keys.AltRight.code:
+            this[key] = !this[key];
+            this.functions.updateButtonClass(key, this[key]);
+            break;
+          default:
+            this.functions.updateButtonClass(key, true);
+            break;
+        }
+      }
+
+      this.events.mouseup = (event) => {
+        const key = event.currentTarget.id.split('-')[0];
+
+        switch (key) {
+          case this.keys.CapsLock.code:
+          case this.keys.ShiftLeft.code:
+          case this.keys.ShiftRight.code:
+          case this.keys.ControlLeft.code:
+          case this.keys.ControlRight.code:
+          case this.keys.AltLeft.code:
+          case this.keys.AltRight.code:
+           // this.functions.updateButtonClass(key, this[key]);
+            break;
+          default:
+            this.functions.updateButtonClass(key);
+            break;
+        }
       }
 
     }
@@ -133,6 +176,9 @@ export class KeyBoard {
 
         this.domNode.addNode({ tag: this.tags.nodeName.button, className: buttonClass, id: `${code}${this.idMasks.nodeLabel.key}` })
           .setStyle({ width: keyWidth, height: keyHeight })
+          .setEvent({ name: 'mousedown', function: this.events.mousedown})
+          .setEvent({ name: 'mouseup', function: this.events.mouseup })
+          .setEvent({ name: 'mouseout', function: this.events.mouseup })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
           this.domNode.addNode({ tag: this.tags.nodeName.sup, className: this.classes.nodeLabel.textAlt, innerText: shiftValue });
