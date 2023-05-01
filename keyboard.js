@@ -81,6 +81,7 @@ export class KeyBoard {
         let values;
         let value;
         let index;
+        let updateClass = true;
 
 
 
@@ -97,7 +98,26 @@ export class KeyBoard {
           case this.keys.AltLeft.code:
           case this.keys.AltRight.code:
             this[key] = !this[key];
+            updateClass = false;
             this.functions.updateButtonClass(key, this[key]);
+            break;
+          case this.keys.Space.code:
+          case this.keys.MetaLeft.code:
+            break;
+          case this.keys.Tab.code:
+            break;  
+          case this.keys.Backspace.code:
+            break;
+          case this.keys.Delete.code:
+            break;
+          case this.keys.ArrowLeft.code:
+            break;
+          case this.keys.ArrowRight.code:
+            break;
+          case this.keys.ArrowUp.code:
+          case this.keys.ArrowDown.code:
+            break;
+          case this.keys.Enter.code:
             break;
           default:
             shift = (this.ShiftLeft || this.ShiftRight) ? true : false;
@@ -107,10 +127,10 @@ export class KeyBoard {
             value = values[index];
             input.value += value;
             this.sequenceKeys('reset');
-
-            this.functions.updateButtonClass(key, true);
             break;
+
         }
+        if (updateClass) { this.functions.updateButtonClass(key, true); }
         this.lastKey = key;
       }
 
