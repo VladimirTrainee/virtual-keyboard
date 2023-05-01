@@ -5,7 +5,7 @@ export class KeyBoard {
     constructor(keys = []) {
       this.tags = new NodeList(['form', 'div', 'textarea', 'button', 'span', 'sup']);
       this.classes = new NodeList(['board', 'keyboardInput', 'textMain', 'textAlt', 'keyMain', 'keyOption'], ['board', 'keyboard-input', 'text-main', 'text-alt', 'key-main', 'key-option']);
-      this.idMasks = new NodeList(['board', 'keyboard', 'text', 'key'], ['board', 'keyboard-input', '-text', '-button']);
+      this.idMasks = new NodeList(['board', 'keyboard', 'text', 'key', 'pressed'], ['board', 'keyboard-input', '-text', '-button', '-pressed']);
       this.button = { width: { value: 6.3, type: '%' }, height: { value: '50', type: 'px' } }
       this.CapsLock = false;
       this.ShiftLeft = false;
@@ -19,6 +19,23 @@ export class KeyBoard {
   
       this.languages = ['En', 'Ru'];
       this.languageIndex = 0;
+      this.events = {};
+      
+      this.events.keydown = (event) => {
+        const key = (this.keys[event.code].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
+        const keyId = `${event.code}${this.idMasks.nodeLabel.key}`;
+        document.getElementById(keyId).classList.value = `${key}${this.idMasks.nodeLabel.pressed}`;
+        return ;
+      }
+
+      this.events.keyup = (event) => {
+        const key = (this.keys[event.code].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
+        const keyId = `${event.code}${this.idMasks.nodeLabel.key}`;
+        document.getElementById(keyId).classList.value = `${key}`;
+        return ;
+      }
+      
+
     }
     
     resetSequenceKeys() {
@@ -55,6 +72,8 @@ export class KeyBoard {
         .addNode({ tag: this.tags.nodeName.form })
         .setNewParent()
         .addNode({ tag: this.tags.nodeName.textarea, className : this.classes.nodeLabel.keyboardInput, id: this.idMasks.nodeLabel.keyboard })
+        .setEvent({ name: 'keydown', function: this.events.keydown })
+        .setEvent({ name: 'keyup', function: this.events.keyup })
         .setParent();
       for (let key of this.keyOrder) {
         const  {
@@ -72,7 +91,7 @@ export class KeyBoard {
         const buttonClass = (inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
 
         this.domNode.addNode({ tag: this.tags.nodeName.button, className: buttonClass, id: `${code}${this.idMasks.nodeLabel.key}` })
-         .setStyle({ width: keyWidth, height: keyHeight })
+          .setStyle({ width: keyWidth, height: keyHeight })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
           this.domNode.addNode({ tag: this.tags.nodeName.sup, className: this.classes.nodeLabel.textAlt, innerText: shiftValue });
