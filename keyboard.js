@@ -5,6 +5,7 @@ export class KeyBoard {
     constructor(keys = []) {
       this.tags = new NodeList(['form', 'div', 'textarea', 'button', 'span', 'sup']);
       this.classes = new NodeList(['board', 'keyboardInput', 'textMain', 'textAlt', 'keyMain', 'keyOption'], ['board', 'keyboard-input', 'text-main', 'text-alt', 'key-main', 'key-option']);
+      this.idMasks = new NodeList(['board', 'keyboard', 'text', 'key'], ['board', 'keyboard-input', '-text', '-button']);
       this.CapsLock = false;
       this.ShiftLeft = false;
       this.ShiftRight = false;
@@ -31,7 +32,7 @@ export class KeyBoard {
       
       for (const key of keyList) {
         this[key] = false;
-        document.getElementById(`${key}-button`).classList.value = this.classes.nodeLabel.keyOption;
+        document.getElementById(`${key}${this.idMasks.nodeLabel.key}`).classList.value = this.classes.nodeLabel.keyOption;
       }
         
       return this;
@@ -52,7 +53,7 @@ export class KeyBoard {
         .setNewParent()
         .addNode({ tag: this.tags.nodeName.form })
         .setNewParent()
-        .addNode({ tag: this.tags.nodeName.textarea, className : this.classes.nodeLabel.keyboardInput, id: 'keyboard-input' })
+        .addNode({ tag: this.tags.nodeName.textarea, className : this.classes.nodeLabel.keyboardInput, id: this.idMasks.nodeLabel.keyboard })
         .setParent();
       for (let key of this.keyOrder) {
         const  {
@@ -67,13 +68,13 @@ export class KeyBoard {
         const keyWidth = `${+width * 6.3}%`;
         const keyHeight = '50px';
 
-        this.domNode.addNode({ tag: this.tags.nodeName.button, className: ((inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain), id: `${code}-button` })
+        this.domNode.addNode({ tag: this.tags.nodeName.button, className: ((inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain), id: `${code}${this.idMasks.nodeLabel.key}` })
           .setStyle({ width: keyWidth, height: keyHeight })
           .setNewParent();
         if (shiftValue && !hideShiftValue) {
           this.domNode.addNode({ tag: this.tags.nodeName.sup, className: this.classes.nodeLabel.textAlt, innerText: shiftValue });
         }
-        this.domNode.addNode({ tag: this.tags.nodeName.span, className: this.classes.nodeLabel.textMain, innerText: label, id: `${code}-label` })
+        this.domNode.addNode({ tag: this.tags.nodeName.span, className: this.classes.nodeLabel.textMain, innerText: label, id: `${code}${this.idMasks.nodeLabel.text}` })
           .setParent();
 
       }
