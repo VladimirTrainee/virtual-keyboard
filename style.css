@@ -1,0 +1,80 @@
+.board {
+  width: 600px;
+   border: 1px solid rgb(32, 47, 165); 
+}
+
+.board:focus {
+  border: 1px solid rgb(255, 0, 0); 
+}
+
+.keyboard-input {
+  font-weight: 1000;
+  width: 97%;
+  height: 100px;
+  padding: 1%;
+}
+.keyboard-input:focus {
+  color:red;
+  background-color: aqua;
+  border: 1px solid red;
+  border-left-color: green;
+  border-width: 1px;
+
+}
+
+.key-button,
+.key-button2 {
+  border: 4px outset #FFF;
+  background-color: #777;
+  cursor: pointer;
+  display: inline-block;
+  height: 1px;
+  padding: 1.2% 0.4% 1.2% 0.4%; 
+}
+
+.key-button2 {
+  background-color: #555;
+}
+
+.key-button:hover,
+.key-button2:hover,
+.key-button:focus,
+.key-button2:focus {
+
+}
+
+.key-button-pressed,
+.key-button2-pressed {
+  border: 4px inset #FFF;
+  background-color: #999;
+  cursor: pointer;
+  display: inline-block;
+  height: 1px;
+  padding: 1.2% 0.4% 1.2% 0.4%;  
+  padding-left: 5px;
+  border: 4px inset #555; 
+}
+
+.key-button2-pressed {
+  border: 4px inset #888; 
+}
+
+.key-main {
+  font-weight: 1000;
+  font-size: 100%; 
+  line-height: 200%; 
+  color:white;
+  padding: 0%;
+  vertical-align: middle; 
+  display:inline-block;
+  height: 100%;
+}
+
+.key-small {
+  font-weight: 700;
+  font-size: 80%; 
+  padding: 0 10% 0 0%;
+  color:white;
+  vertical-align: top; 
+  display:inline-block;
+}
