@@ -39,6 +39,6 @@ const keyBoard = new KeyBoard([
   { code: 'Language', width: '1.1', inverse: true }
 ]);
 
-keyBoard.setParent(document.getElementById('main'))
+keyBoard.setParent(document.getElementById('body'))
   .createNode();
 
