@@ -26,6 +26,7 @@ export class KeyBoard {
         const element = (keyId) ? document.getElementById(keyId) : undefined;
         return element;
       }
+
       this.functions.updateButtonClass = (keyCode, pressed = false) => {
         if (!keyCode) return;
         const keyName = (this.keys[keyCode].inverse) ? this.classes.nodeLabel.keyOption : this.classes.nodeLabel.keyMain;
@@ -34,6 +35,11 @@ export class KeyBoard {
         if (element) {
            element.classList.value = `${keyName}${pressedMask}`;
         }
+      }
+
+      this.functions.moveSelector = (input, offSet) => {
+        if (input.selectionStart + offSet >= 0) { input.selectionStart += offSet; }
+        input.selectionEnd = input.selectionStart;
       }
 
       this.functions.updateSelector = (input, offSet = 0, value = '') => {
@@ -141,8 +147,10 @@ export class KeyBoard {
             this.functions.updateSelector(input, 1);
             break;
           case this.keys.ArrowLeft.code:
+            this.functions.moveSelector(input, -1);
             break;
           case this.keys.ArrowRight.code:
+            this.functions.moveSelector(input, 1);
             break;
           case this.keys.ArrowUp.code:
           case this.keys.ArrowDown.code:
